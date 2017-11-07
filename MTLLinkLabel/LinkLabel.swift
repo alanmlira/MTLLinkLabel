@@ -91,15 +91,15 @@ public extension LinkLabelDelegate {
     
     func linkAttributeForLinkLabel(_ linkLabel: LinkLabel, checkingType: NSTextCheckingResult.CheckingType) -> [String: AnyObject] {
         return [
-            NSForegroundColorAttributeName: linkLabel.tintColor,
-            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue as AnyObject
+            NSAttributedStringKey.foregroundColor.rawValue: linkLabel.tintColor,
+            NSAttributedStringKey.underlineStyle.rawValue: NSUnderlineStyle.styleSingle.rawValue as AnyObject
         ]
     }
     
     func linkDefaultAttributeForCustomeLink(_ linkLabel: LinkLabel) -> [String: AnyObject] {
         return [
-            NSForegroundColorAttributeName: linkLabel.tintColor,
-            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue as AnyObject
+            NSAttributedStringKey.foregroundColor.rawValue: linkLabel.tintColor,
+            NSAttributedStringKey.underlineStyle.rawValue: NSUnderlineStyle.styleSingle.rawValue as AnyObject
         ]
     }
     
@@ -125,11 +125,11 @@ open class LinkLabel: UILabel {
             }
             let mAttributedString = NSMutableAttributedString(string: str)
             if let text = self.text {
-                if text.characters.count > 0 {
+                if text.count > 0 {
                     mAttributedString.addAttribute(
-                    NSFontAttributeName,
+                    NSAttributedStringKey.font,
                         value: self.font,
-                        range: NSMakeRange(0, text.characters.count)
+                        range: NSMakeRange(0, text.count)
                     )
                 }
             }
@@ -216,7 +216,7 @@ open class LinkLabel: UILabel {
             
             if let link = linkOrNil {
                 let mAttributedString = NSMutableAttributedString(attributedString: self.attributedText!)
-                mAttributedString.addAttribute(NSBackgroundColorAttributeName, value: UIColor(white: 0.0, alpha: 0.1), range: link.range)
+                mAttributedString.addAttribute(NSAttributedStringKey.backgroundColor, value: UIColor(white: 0.0, alpha: 0.1), range: link.range)
                 super.attributedText = mAttributedString
                 return
             }
@@ -226,7 +226,7 @@ open class LinkLabel: UILabel {
                 guard let result = resultOrNil else { return }
                 
                 let mAttributedString = NSMutableAttributedString(attributedString: self.attributedText!)
-                mAttributedString.addAttribute(NSBackgroundColorAttributeName, value: UIColor(white: 0.0, alpha: 0.1), range: result.range)
+                mAttributedString.addAttribute(NSAttributedStringKey.backgroundColor, value: UIColor(white: 0.0, alpha: 0.1), range: result.range)
                 super.attributedText = mAttributedString
             }
         }
@@ -265,17 +265,17 @@ open class LinkLabel: UILabel {
 
         if count > 0 {
             let mAttributedString = NSMutableAttributedString(attributedString: self.attributedText!)
-            mAttributedString.removeAttribute(NSBackgroundColorAttributeName, range: NSMakeRange(0, count))
+            mAttributedString.removeAttribute(NSAttributedStringKey.backgroundColor, range: NSMakeRange(0, count))
             super.attributedText = mAttributedString
         }
     }
     
     override open func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        if let count = self.attributedText?.string.characters.count {
+        if let count = self.attributedText?.string.count {
             if count > 0 {
                 let mAttributedString = NSMutableAttributedString(attributedString: self.attributedText!)
-                mAttributedString.removeAttribute(NSBackgroundColorAttributeName, range: NSMakeRange(0, count))
+                mAttributedString.removeAttribute(NSAttributedStringKey.backgroundColor, range: NSMakeRange(0, count))
                 super.attributedText = mAttributedString
             }
         }
@@ -316,7 +316,7 @@ open class LinkLabel: UILabel {
         if let attributedString = self.attributedText {
             let ma = NSMutableAttributedString(attributedString: attributedString)
             
-            ma.addAttribute(NSFontAttributeName, value: self.font, range: NSMakeRange(0, (ma.string as NSString).length))
+            ma.addAttribute(NSAttributedStringKey.font, value: self.font, range: NSMakeRange(0, (ma.string as NSString).length))
             self.textStorage = NSTextStorage(attributedString: ma)
         }
         else {
@@ -386,7 +386,10 @@ open class LinkLabel: UILabel {
         
         let mAttributeString = NSMutableAttributedString(attributedString: attributedString)
         let t = f(first)
-        mAttributeString.addAttributes(t.0, range: t.1)
+        
+        t.0.forEach { (key, value) in
+            mAttributeString.addAttribute(NSAttributedStringKey.init(key), value: value, range: t.1)
+        }
         
         return self.mekeAttributeStringA(
             mAttributeString,
